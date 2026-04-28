@@ -39,20 +39,20 @@ See [`labels/README.md`](labels/README.md) for full annotation details.
 
 ### Regression Models (Landmark Detection → Quality Assessment)
 
-Both models are adapted for coordinate regression to predict nipple and pectoralis muscle landmark coordinates from grayscale mammographic images.
+Both models take grayscale mammographic images as input and predict the coordinates of the nipple and pectoralis muscle landmarks. Positioning quality (good/poor) is then derived automatically from the resulting PNL geometry.
 
-- **UNet** — Encoder–decoder architecture with skip connections, adapted for landmark regression.
-- **Attention UNet (RAUNet)** — Extends UNet with attention gates at each decoder level to focus on anatomically relevant regions.
+- **UNet** — Encoder–decoder architecture with skip connections, adapted for landmark coordinate regression.
+- **Attention UNet (RAUNet)** — Extends UNet with attention gates at each decoder level to focus on anatomically relevant spatial regions.
 
 ### Classification Model
 
-- **ResNeXt50** — ResNeXt-50 (32×4d) fine-tuned for binary positioning quality classification (good / poor), adapted to accept single-channel (grayscale) input.
+- **ResNeXt50** — ResNeXt-50 (32×4d) fine-tuned for direct binary positioning quality classification (good / poor), adapted to accept single-channel (grayscale) input.
 
 ## Installation
 
 ```bash
-git clone https://github.com/<your-username>/mlo-breast-positioning.git
-cd mlo-breast-positioning
+git clone https://github.com/<your-username>/mlo-breast-positioning-assessment.git
+cd mlo-breast-positioning-assessment
 pip install torch torchvision pandas numpy scikit-learn matplotlib Pillow pydicom
 ```
 
@@ -65,7 +65,7 @@ cd code/regression/main
 python main.py --config configs/example_config.json
 ```
 
-Edit `configs/example_config.json` to set paths and select model type (`"UNet"` or `"RAUNet"`).
+Set `model_type` to `"UNet"` or `"RAUNet"` in the config file.
 
 ### Training — Classification Model
 
@@ -74,7 +74,7 @@ cd code/classification
 python main.py
 ```
 
-Update the `config` dictionary in `main.py` with your dataset paths and desired hyperparameters.
+Update the `config` dictionary in `main.py` with your dataset paths and hyperparameters.
 
 ### Evaluation — Regression
 
@@ -92,34 +92,64 @@ python test.py
 
 GradCAM visualizations are saved to `gradcam_outs/`.
 
-## Performance
+## Hyperparameters
 
-Distance errors are reported as mean (μ), standard deviation (σ), and median (x̃) in millimeters. Classification results are reported as mean ± standard deviation across 5 independent training runs.
+| Hyperparameter | Regression Models (UNet / Attention UNet)        | Classification Model (ResNeXt50) |
+|----------------|--------------------------------------------------|----------------------------------|
+| Task           | Landmark coordinate regression (Pec1, Pec2, Nipple) | Binary quality classification (Good / Poor) |
+| Optimizer      | AdamW                                            | Adam                             |
+| Batch Size     | 32                                               | 32                               |
+| Epochs         | 300                                              | 30                               |
+| Learning Rate  | CyclicLR (base: 1e-5, max: 5e-4)                | Fixed: 1e-4                      |
+| Loss Function  | Weighted combination (MSE + MAE + SmoothL1 + Wing) | Cross-Entropy Loss             |
+
+## Performance
 
 ### Landmark Distance Errors (mm)
 
+Distance errors are reported as mean (μ), standard deviation (σ), and median (x̃) in millimeters on the test set.
+
 | Model          | Perp μ | Perp σ | Perp x̃ | Pec1 μ | Pec1 σ | Pec1 x̃ | Pec2 μ | Pec2 σ | Pec2 x̃ | Nipple μ | Nipple σ | Nipple x̃ | Angular μ | Angular σ | Angular x̃ |
 |----------------|--------|--------|---------|--------|--------|---------|--------|--------|---------|----------|----------|-----------|-----------|-----------|------------|
-| UNet           | 9.62   | 7.86   | 8.03    | 8.19   | 6.89   | 6.01    | 14.01  | 14.01  | 10.90   | 6.80     | 5.25     | 5.72      | 3.52      | 3.15      | 2.66       |
-| Attention UNet | **5.12** | **5.04** | **3.56** | **6.01** | **5.87** | **4.03** | **6.94** | **8.25** | **3.95** | **2.98** | **2.40** | **2.52** | **2.58** | **2.73** | **1.81** |
+| UNet           | 9.79   | 6.57   | 8.63    | 8.43   | 7.16   | 6.68    | 13.34  | 10.76  | 10.62   | 5.57     | 4.36     | 4.62      | 3.81      | 3.11      | 2.93       |
+| Attention UNet | **6.00** | **5.41** | **4.45** | **6.88** | **6.17** | **5.12** | **8.85** | **9.89** | **6.50** | **3.01** | **2.53** | **2.33** | **2.94** | **2.61** | **2.26** |
+
+### Landmark Pixel Errors
+
+| Model          | Perp (Mean ± Std) | Pec1 (Mean ± Std) | Pec2 (Mean ± Std) | Nipple (Mean ± Std) | Angular (°) Mean ± Std | Angular (°) Median |
+|----------------|-------------------|-------------------|-------------------|---------------------|------------------------|--------------------|
+| UNet           | 20.39 ± 14.26     | 17.16 ± 14.65     | 27.55 ± 22.47     | 11.56 ± 9.37        | 3.81 ± 3.11            | 2.93               |
+| Attention UNet | **12.44 ± 11.33** | **14.02 ± 12.51** | **18.37 ± 20.67** | **6.32 ± 5.50**     | **2.94 ± 2.61**        | **2.26**           |
 
 ### Positioning Quality Classification
 
-Results on automatically generated PNL-based quality labels. The Attention UNet pipeline (RAUNet) predicts landmark coordinates and derives positioning quality from the resulting PNL.
+Positioning quality (good / poor) is derived from the predicted landmarks via the PNL rule for the regression models, and predicted directly for ResNeXt50.
 
-| Model          | Accuracy (%)         | Specificity (%)      | Sensitivity (%)      |
-|----------------|----------------------|----------------------|----------------------|
-| ResNeXt50      | 73.7 ± 3.35          | 76.91 ± 6.26         | 68.57 ± 11.41        |
-| UNet           | 70.63 ± 1.49         | 78.46 ± 1.56         | 58.12 ± 2.68         |
-| Attention UNet | **88.2 ± 2.51**      | **88.62 ± 4.11**     | **87.53 ± 3.51**     |
+| Model          | Accuracy (%) | Sensitivity (%) | Specificity (%) |
+|----------------|--------------|-----------------|-----------------|
+| ResNeXt50      | 72.00        | 37.04           | 84.93           |
+| UNet           | 82.00        | 71.43           | 88.62           |
+| Attention UNet | **85.50**    | **84.42**       | **86.18**       |
 
 ## Example Predictions
 
-### Attention UNet — Landmark Predictions
+### Model Comparison on Test Sample
 
-<img width="900" alt="Attention UNet predictions on test samples" src="code/regression/main/predictions/RAUNET.png">
+The figure below shows predictions from all three models on the same test mammogram. The Attention UNet accurately localizes the nipple and pectoralis muscle landmarks, from which the PNL is automatically derived.
 
-### ResNeXt50 — GradCAM Visualization
+<p align="center">
+  <img width="950" alt="Model comparison on test sample 198" src="assets/combined_models_198.png">
+</p>
+
+### Pipeline Overview — Good vs. Poor Positioning
+
+The top row shows well-positioned mammograms: the predicted PNL aligns with the pectoralis muscle line, and the classification model correctly identifies them as good. The bottom row shows poorly positioned cases: PNL and pectoralis line diverge, and the classification model correctly flags them as poor.
+
+<p align="center">
+  <img width="950" alt="Pipeline overview: good vs poor positioning examples" src="assets/Figure3.png">
+</p>
+
+### GradCAM — ResNeXt50 Attention Maps
 
 <p align="center">
   <img width="220" alt="GradCAM 1" src="code/classification/gradcam_outs/gradcam_1.png">
