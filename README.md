@@ -149,13 +149,6 @@ The top row shows well-positioned mammograms: the predicted PNL aligns with the 
   <img width="950" alt="Pipeline overview: good vs poor positioning examples" src="assets/Figure3.png">
 </p>
 
-### GradCAM — ResNeXt50 Attention Maps
-
-<p align="center">
-  <img width="220" alt="GradCAM 1" src="code/classification/gradcam_outs/gradcam_1.png">
-  <img width="220" alt="GradCAM 2" src="code/classification/gradcam_outs/gradcam_2.png">
-  <img width="220" alt="GradCAM 3" src="code/classification/gradcam_outs/gradcam_3.png">
-</p>
 
 ## Contributing
 
