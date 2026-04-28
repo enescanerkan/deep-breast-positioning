@@ -51,8 +51,8 @@ Both models take grayscale mammographic images as input and predict the coordina
 ## Installation
 
 ```bash
-git clone https://github.com/<your-username>/mlo-breast-positioning-assessment.git
-cd mlo-breast-positioning-assessment
+git clone https://github.com/enescanerkan/deep-breast-positioning.git
+cd deep-breast-positioning
 pip install torch torchvision pandas numpy scikit-learn matplotlib Pillow pydicom
 ```
 
