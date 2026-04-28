@@ -143,7 +143,7 @@ The figure below shows predictions from all three models on the same test mammog
 
 ### Pipeline Overview — Good vs. Poor Positioning
 
-The top row shows well-positioned mammograms: the predicted PNL aligns with the pectoralis muscle line, and the classification model correctly identifies them as good. The bottom row shows poorly positioned cases: PNL and pectoralis line diverge, and the classification model correctly flags them as poor.
+The top row demonstrates well-positioned mammograms where the predicted PNL aligns perfectly with the pectoralis muscle line, and the classification model correctly identifies them as "Good." However, the bottom row shows poorly positioned cases where the PNL and the pectoralis line clearly diverge and do not overlap. Despite this visible misalignment, the classification model has incorrectly labeled these cases as "Good," highlighting a failure in the model's prediction that should be corrected to "Poor."
 
 <p align="center">
   <img width="950" alt="Pipeline overview: good vs poor positioning examples" src="assets/Figure3.png">
