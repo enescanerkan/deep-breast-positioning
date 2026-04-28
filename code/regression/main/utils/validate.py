@@ -13,8 +13,7 @@ class Validator:
             epsilon=config['epsilon'],
             alpha=config['alpha'],
             beta=config['beta'],
-            gamma=config['gamma'],
-            delta=config['delta']
+            gamma=config['gamma']
         ).to(self.device)
         self.best_val_loss = float('inf')
 

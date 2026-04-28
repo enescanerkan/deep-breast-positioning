@@ -32,7 +32,7 @@ class QualityDataset(Dataset):
         image = np.load(image_path)
         
         if self.label_type == 'manual':
-            label = 0 if row['manual_quality'] == 'Bad' else 1
+            label = 0 if row['qualitativeLabel'] == 'Bad' else 1
         elif self.label_type == 'automated':
             label = 0 if row['automated_quality'] == 'Bad' else 1
 

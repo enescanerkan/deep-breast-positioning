@@ -44,17 +44,18 @@ def visualize_images(dicom_path, processed_path, original_landmarks, processed_l
     plt.close()
 
 # Configuration of paths
-dicom_base_path = '../quality'
-processed_image_dir = '../data/images'
-fig_save_path = '../figures/debug_preprocessing'
-transformation_details_path = '../data/transformation_details.csv'
+script_dir = os.path.dirname(__file__)
+dicom_base_path = os.path.join(script_dir, '..', 'quality')
+processed_image_dir = os.path.join(script_dir, '..', 'data', 'images')
+fig_save_path = os.path.join(script_dir, '..', 'figures', 'debug_preprocessing')
+transformation_details_path = os.path.join(script_dir, '..', 'data', 'transformation_details.csv')
 
 # Ensure the directory exists
 os.makedirs(fig_save_path, exist_ok=True)
 
 # Load the transformation details and unified_df for DICOM paths
 transformation_df = pd.read_csv(transformation_details_path)
-unified_df = pd.read_csv('../annotations/unified_data.csv')
+unified_df = pd.read_csv(os.path.join(script_dir, '..', '..', '..', 'labels', 'positioning_labels.csv'))
 
 # SOPInstanceUIDs for debugging
 sop_instance_uids = [

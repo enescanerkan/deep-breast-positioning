@@ -94,7 +94,7 @@ def main(config):
 if __name__ == "__main__":
     config = {
         'model_name': 'resnext50',  # or 'resnet50', 'efficientnetv2', etc.
-        'label_type': 'automated',  # 'manual or 'automated'
+        'label_type': 'manual',  # 'manual or 'automated'
         'num_classes': 2,
         'batch_size': 8,
         'num_epochs': 30,
@@ -103,8 +103,8 @@ if __name__ == "__main__":
         'step_size_down': 10,
         'learning_rate': 1e-4,
         'device': torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-        'image_dir': '../data/images',
-        'annotations_file': '../annotations/classification_data.csv',
-        'best_model_path': '../best_model.pth'
+        'image_dir': '../regression/data/images',
+        'annotations_file': '../../labels/positioning_labels.csv',
+        'best_model_path': 'models/best_model.pth'
     }
     main(config)

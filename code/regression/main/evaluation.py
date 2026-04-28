@@ -78,9 +78,9 @@ def evaluate_and_label(config, model, test_loader, unified_df):
 
             image_shape = (img_height, img_width)
 
-            orig_automated_quality = is_point_inside_image_with_threshold(image_shape, perp_orig_endpoint, threshold_percentage=0)
+            orig_automated_quality = is_point_inside_image_with_threshold(image_shape, perp_orig_endpoint, threshold_percentage=0.25)
             orig_manual_quality = unified_df.iloc[i]['qualitativeLabel'] == "Good"
-            pred_quality = is_point_inside_image_with_threshold(image_shape, perp_pred_endpoint, threshold_percentage=0)
+            pred_quality = is_point_inside_image_with_threshold(image_shape, perp_pred_endpoint, threshold_percentage=0.25)
             automated_accuracy = "accurate" if orig_automated_quality == pred_quality else "inaccurate"
             manual_accuracy = "accurate" if orig_manual_quality == pred_quality else "inaccurate"
             correct_automated_predictions += 1 if orig_automated_quality == pred_quality else 0

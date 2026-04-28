@@ -1,2 +1,6 @@
 *.pyc
 *.pth
+__pycache__/
+code/regression/data/images/
+code/classification/models/
+code/regression/main/models/

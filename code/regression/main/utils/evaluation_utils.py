@@ -3,7 +3,7 @@ from math import atan2, degrees
 import numpy as np
 import pandas as pd
 import torch
-from utils.models import UNet, RAUNet, CRAUNet, ResNeXt50
+from utils.models import UNet, RAUNet
 
 
 def load_config(file_path):
@@ -18,10 +18,6 @@ def load_model(model_type, model_path, device):
         model = UNet(in_channels=1, out_features=6).to(device)
     elif model_type == "RAUNet":
         model = RAUNet(in_channels=1, out_features=6).to(device)
-    elif model_type == "CRAUNet":
-        model = CRAUNet(in_channels=1, out_features=6).to(device)
-    elif model_type == "ResNeXt50":
-        model = ResNeXt50(in_channels=1, out_features=6).to(device)
     else:
         raise ValueError(f"Unsupported model type: {model_type}")
 
@@ -157,22 +153,6 @@ def calculate_side_specific_angle(x1, y1, x2, y2, orientation):
     return angle_from_vertical
 
 
-
-
-####
-
-# def calculate_sensitivity_specificity(predictions, truths):
-#     """
-#     Calculate sensitivity and specificity based on binary classification outcomes.
-#     """
-#     tp = np.sum((predictions == 1) & (truths == 1))
-#     fn = np.sum((predictions == 0) & (truths == 1))
-#     tn = np.sum((predictions == 0) & (truths == 0))
-#     fp = np.sum((predictions == 1) & (truths == 0))
-
-#     sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
-#     specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-#     return sensitivity, specificity
 
 def calculate_sensitivity_specificity(predictions, truths):
     """

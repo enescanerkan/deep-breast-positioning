@@ -1,66 +1,132 @@
 
-# Mammographic Breast Positioning Assessment via Deep Learning
-Breast cancer is a primary cause of cancer-related deaths among women globally, highlighting the critical role of early detection through mammography screening. However, the effectiveness of mammography significantly depends on the accuracy of breast positioning. Incorrect positioning can lead to diagnostic errors, increased patient distress, and unnecessary additional imaging and costs.
+# MLO Breast Positioning Assessment via Deep Learning
 
-Despite profound advancements in deep learning for breast cancer diagnostics, there has been a noticeable gap in tools specifically aimed at assessing the quality of mammogram positioning. Our paper addresses this gap by introducing a novel deep learning approach that quantitatively assesses the positioning quality of mediolateral oblique (MLO) mammograms. Utilizing advanced techniques such as attention mechanisms and coordinate convolution modules, our method identifies crucial anatomical landmarks like the nipple and pectoralis muscle, and automatically delineates the posterior nipple line (PNL).
+Breast cancer is a leading cause of cancer-related mortality in women worldwide, making early detection through mammography screening critically important. The effectiveness of mammography, however, depends heavily on accurate breast positioning. Suboptimal positioning can result in missed findings, increased patient discomfort, and unnecessary repeat imaging.
 
-This GitHub repository contains the source code, models, and instructions necessary for deploying and studying the task of mammography positioning.
+This repository implements a deep learning pipeline for quantitative assessment of mediolateral oblique (MLO) mammogram positioning quality. The pipeline detects anatomical landmarks — the nipple and pectoralis muscle — and automatically delineates the Posterior Nipple Line (PNL) to evaluate positioning quality. Two segmentation-based regression models (UNet and Attention UNet) and one classification model (ResNeXt50) are included.
 
-## Labels
-For detailed descriptions of the labels, visit [this link](https://github.com/tanyelai/deep-breast-positioning/tree/main/labels).
+## Repository Structure
 
+```
+├── code/
+│   ├── classification/          # ResNeXt50 binary quality classifier
+│   │   ├── main.py              # Training entry point
+│   │   ├── test.py              # Inference + GradCAM visualization
+│   │   └── utils/               # Dataloader, model, loss, metrics
+│   └── regression/              # Landmark regression models (UNet / Attention UNet)
+│       ├── main/
+│       │   ├── main.py          # Training entry point
+│       │   ├── evaluation.py    # Evaluation with distance metrics
+│       │   ├── visualize_test_predictions.py
+│       │   └── utils/           # Dataloader, models, loss, train, validate
+│       └── preprocessing/       # DICOM preprocessing pipeline
+└── labels/                      # Dataset annotation details
+```
+
+## Dataset
+
+Labels were created on 1,000 randomly selected MLO mammograms from the [VinDr-Mammo](https://vindr.ai/datasets/mammo) open-access dataset. Annotations were performed by two board-certified breast radiologists with over five years of breast imaging experience.
+
+| Split      | Automated PNL-based Quality | Expert Qualitative Label |
+|:----------:|:---------------------------:|:------------------------:|
+| Training   | 967 good, 633 poor          | 1,185 good, 415 poor     |
+| Validation | 108 good, 92 poor           | 132 good, 68 poor        |
+| Testing    | 123 good, 77 poor           | 146 good, 54 poor        |
+
+See [`labels/README.md`](labels/README.md) for full annotation details.
+
+## Models
+
+### Regression Models (Landmark Detection → Quality Assessment)
+
+Both models are adapted for coordinate regression to predict nipple and pectoralis muscle landmark coordinates from grayscale mammographic images.
+
+- **UNet** — Encoder–decoder architecture with skip connections, adapted for landmark regression.
+- **Attention UNet (RAUNet)** — Extends UNet with attention gates at each decoder level to focus on anatomically relevant regions.
+
+### Classification Model
+
+- **ResNeXt50** — ResNeXt-50 (32×4d) fine-tuned for binary positioning quality classification (good / poor), adapted to accept single-channel (grayscale) input.
 
 ## Installation
-To set up the project environment:
+
 ```bash
-git clone https://github.com/tanyelai/deep-breast-positioning.git
-cd deep-breast-positioning
+git clone https://github.com/<your-username>/mlo-breast-positioning.git
+cd mlo-breast-positioning
+pip install torch torchvision pandas numpy scikit-learn matplotlib Pillow pydicom
 ```
+
+## Usage
+
+### Training — Regression Models
+
+```bash
+cd code/regression/main
+python main.py --config configs/example_config.json
+```
+
+Edit `configs/example_config.json` to set paths and select model type (`"UNet"` or `"RAUNet"`).
+
+### Training — Classification Model
+
+```bash
+cd code/classification
+python main.py
+```
+
+Update the `config` dictionary in `main.py` with your dataset paths and desired hyperparameters.
+
+### Evaluation — Regression
+
+```bash
+cd code/regression/main
+python evaluation.py --config configs/example_eval_config.json
+```
+
+### Inference + GradCAM — Classification
+
+```bash
+cd code/classification
+python test.py
+```
+
+GradCAM visualizations are saved to `gradcam_outs/`.
 
 ## Performance
 
-### Distance Errors in Millimeters (mm)
+Distance errors are reported as mean (μ), standard deviation (σ), and median (x̃) in millimeters. Classification results are reported as mean ± standard deviation across 5 independent training runs.
 
-Distance errors are presented as mean (μ), standard deviation (σ), and median (x∼) to mitigate the influence of challenging cases (primarily due to subjectivity of the task).
+### Landmark Distance Errors (mm)
 
-| Models         | Perp μ | Perp σ | Perp x∼ | Pec1 μ | Pec1 σ | Pec1 x∼ | Pec2 μ | Pec2 σ | Pec2 x∼ | Nipple μ | Nipple σ | Nipple x∼ | Angular μ | Angular σ | Angular x∼ |
+| Model          | Perp μ | Perp σ | Perp x̃ | Pec1 μ | Pec1 σ | Pec1 x̃ | Pec2 μ | Pec2 σ | Pec2 x̃ | Nipple μ | Nipple σ | Nipple x̃ | Angular μ | Angular σ | Angular x̃ |
 |----------------|--------|--------|---------|--------|--------|---------|--------|--------|---------|----------|----------|-----------|-----------|-----------|------------|
-| R-ResNeXt50    | 7.13   | 4.23   | 6.49    | 7.33   | 6.01   | 5.24    | 7.93   | 7.00   | 6.20    | 4.63     | 1.99     | 4.45      | 2.71      | 2.44      | 1.96       |
-| UNet           | 9.62   | 7.86   | 8.03    | 8.19   | 6.89   | 6.01    | 14.01  | 14.01  | 10.9    | 6.80     | 5.25     | 5.72      | 3.52      | 3.15      | 2.66       |
-| Attention UNet | 5.12   | 5.04   | 3.56    | 6.01   | 5.87   | 4.03    | 6.94   | 8.25   | 3.95    | 2.98     | 2.40     | 2.52      | 2.58      | 2.73      | 1.81       |
-| CoordAtt UNet  | 4.99   | 4.88   | 3.82    | 5.62   | 5.29   | 4.14    | 6.49   | 7.37   | 4.26    | 2.97     | 2.46     | 2.45      | 2.42      | 2.56      | 1.75       |
+| UNet           | 9.62   | 7.86   | 8.03    | 8.19   | 6.89   | 6.01    | 14.01  | 14.01  | 10.90   | 6.80     | 5.25     | 5.72      | 3.52      | 3.15      | 2.66       |
+| Attention UNet | **5.12** | **5.04** | **3.56** | **6.01** | **5.87** | **4.03** | **6.94** | **8.25** | **3.95** | **2.98** | **2.40** | **2.52** | **2.58** | **2.73** | **1.81** |
 
-### Test Results on Automatically Generated Quality Labels
+### Positioning Quality Classification
 
-Test results on automatically generated quality labels extracted from radiologists' label drawings. The raw ResNeXt50 model was trained for binary classification based on image-level labels. The R-ResNeXt50 model had its last layer modified to function as a landmark regressor, predicting coordinates and overall positioning quality, similar to our proposed pipeline. Results are presented as the mean ± standard deviation of 5 different training runs.
+Results on automatically generated PNL-based quality labels. The Attention UNet pipeline (RAUNet) predicts landmark coordinates and derives positioning quality from the resulting PNL.
 
-| Model         | Accuracy            | Specificity         | Sensitivity         |
-|---------------|---------------------|---------------------|---------------------|
-| ResNeXt50     | 73.7 ± 3.35         | 76.91 ± 6.26        | 68.57 ± 11.41       |
-| R-ResNeXt50   | 82.3 ± 5.03         | 81.42 ± 12.34       | 83.38 ± 10.49       |
-| UNet          | 70.63 ± 1.49        | 78.46 ± 1.56        | 58.12 ± 2.68        |
-| Attention UNet| 88.2 ± 2.51         | 88.62 ± 4.11        | **87.53 ± 3.51**    |
-| CoordAtt UNet | **88.63 ± 2.84**    | **90.25 ± 4.04**    | 86.04 ± 3.41        |
+| Model          | Accuracy (%)         | Specificity (%)      | Sensitivity (%)      |
+|----------------|----------------------|----------------------|----------------------|
+| ResNeXt50      | 73.7 ± 3.35          | 76.91 ± 6.26         | 68.57 ± 11.41        |
+| UNet           | 70.63 ± 1.49         | 78.46 ± 1.56         | 58.12 ± 2.68         |
+| Attention UNet | **88.2 ± 2.51**      | **88.62 ± 4.11**     | **87.53 ± 3.51**     |
 
 ## Example Predictions
-<img width="983" alt="image" src="https://github.com/tanyelai/deep-breast-positioning/assets/44132720/2307adc8-95b1-4805-b8d4-5fb9e1107967">
 
-## Citation
-If you use this software, data, or methodology in your research, please cite as follows:
-```
-@article{tanyel2024mammographic,
-  title={Mammographic Breast Positioning Assessment via Deep Learning},
-  author={Tanyel, Toygar and Denizoglu, Nurper and Seker, Mustafa Ege and Alis, Deniz and Cerekci, Esma and Karaarslan, Ercan and Aribal, Erkin and Oksuz, Ilkay},
-  journal={arXiv preprint arXiv:2407.10796},
-  year={2024}
-}
-```
-Will be updated after publication in MICCAI-2024.
+### Attention UNet — Landmark Predictions
+
+<img width="900" alt="Attention UNet predictions on test samples" src="code/regression/main/predictions/RAUNET.png">
+
+### ResNeXt50 — GradCAM Visualization
+
+<p align="center">
+  <img width="220" alt="GradCAM 1" src="code/classification/gradcam_outs/gradcam_1.png">
+  <img width="220" alt="GradCAM 2" src="code/classification/gradcam_outs/gradcam_2.png">
+  <img width="220" alt="GradCAM 3" src="code/classification/gradcam_outs/gradcam_3.png">
+</p>
 
 ## Contributing
-Contributions are welcome! For major changes, please open an issue first to discuss what you would like to change.
 
-Please ensure to update tests as appropriate.
-
-## Contact
-For questions or further inquiries about the code, please reach out at tanyel23@itu.edu.tr.
+Contributions are welcome. For significant changes, please open an issue first to discuss the proposed modification.

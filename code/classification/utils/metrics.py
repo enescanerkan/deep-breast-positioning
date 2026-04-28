@@ -36,7 +36,7 @@ def evaluate_model(model, loader, device, num_classes, metrics_csv, results_csv,
     test_annotations = annotations[annotations['Split'] == 'Test']
     study_uids = test_annotations['StudyInstanceUID'].tolist()
     sop_uids = test_annotations['SOPInstanceUID'].tolist()
-    ground_truths = test_annotations['manual_quality'].tolist()
+    ground_truths = test_annotations['qualitativeLabel'].tolist()
 
     with torch.no_grad():
         for i, (images, labels) in enumerate(loader):
@@ -117,7 +117,7 @@ def gradcam_visualization(model, loader, device, output_dir):
     target_layer = model.layer4[-1]
 
     # Setup Grad-CAM
-    cam = GradCAM(model=model, target_layers=[target_layer], use_cuda=device.type == 'cuda')
+    cam = GradCAM(model=model, target_layers=[target_layer])
 
     for batch_idx, (images, _) in enumerate(loader):
         for idx, img_tensor in enumerate(images):

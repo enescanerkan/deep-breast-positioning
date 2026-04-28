@@ -1,72 +1,67 @@
-# Description for labels
 
-## Definition of Findings Used in the Study
+# Label Description
 
-| Label                   | Explanation                                                                                   |
-|-------------------------|-----------------------------------------------------------------------------------------------|
-| Nipple Bounding Box     | A bounding box surrounding the nipple                                                         |
-| Pectoralis Muscle Line  | A line delineating and starting from the inferior end of the pectoralis muscle                 |
-| Posterior Nipple Line (PNL) | A line perpendicular to the pectoralis muscle line starting from the center of the nipple bounding box |
-| Qualitative Quality     | An image-level quality label given by an expert radiologist based on PNL criteria and further practical experience |
+## Definition of Findings
 
-## Label Description
+| Label                       | Explanation                                                                                                                |
+|-----------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| Nipple Bounding Box         | A bounding box surrounding the nipple region                                                                               |
+| Pectoralis Muscle Line      | A line delineating the pectoralis muscle, starting from its inferior end                                                   |
+| Posterior Nipple Line (PNL) | A line perpendicular to the pectoralis muscle line, originating from the center of the nipple bounding box                 |
+| Qualitative Quality Label   | An image-level quality label assigned by an expert radiologist based on PNL criteria and broader clinical experience       |
 
-In the labeling process, we used the publicly available VinDr Mammography open-access large-scale dataset (Nguyen et al., 2023). The VinDr Mammography dataset includes 5000 mammography exams collected from opportunistic screening settings in two hospitals in Vietnam between 2018 and 2020.
+## Dataset
 
-For our labeling, we randomly selected 1000 exams from the VinDr Mammography dataset, including only mediolateral oblique (MLO) views. Ground truth annotations were carried out by two board-certified breast radiologist (N.D. and E.C.) with over five years of experience in breast imaging. 
+Labels were created on 1,000 randomly selected MLO mammograms drawn from the publicly available **VinDr-Mammo** dataset (Nguyen et al., 2023). VinDr-Mammo contains 5,000 full-field digital mammography exams collected from opportunistic screening in two Vietnamese hospitals between 2018 and 2020.
 
-### Quantitative Labels (data)
-The radiologist (N.D.) annotated the mammograms using a specialized workstation equipped with a browser-based annotation tool (https://matrix.md.ai) and a 6-megapixel diagnostic monitor (Radiforce RX 660, EIZO), reviewing all images in the Digital Imaging and Communications in Medicine (DICOM) format. Annotations included the nipple and the pectoralis muscle line from the inferior end on MLO views, in accordance with the guidelines of the American College of Radiology and the Royal Australian and New Zealand College of Radiologists (Australian Screening Advisory Committee, 2001; Hendrick et al., 1999; Royal Australian and New Zealand College of Radiologists, 2002).
+Ground truth annotations were performed by two board-certified breast radiologists (N.D. and E.C.) with over five years of experience in breast imaging.
 
-**Note:**
-We do not explicitly provide coordinates for PNL; however, the PNL can be automatically generated using a 90° rule, extending from the nipple coordinate to the pectoral muscle line. This ensures that all PNLs are perpendicular to the pectoral muscle during the evaluation phase.
+### Quantitative Labels (`data`)
 
-### Qualitative Labels (qualitativeLabel)
-After the lines and nipple bounding box other radiologist (E.C.) assessed the images for breast positioning and classified the MLO views as poor or good based on ACR quality standards (Hendrick et al., 1999).
+Radiologist N.D. annotated mammograms using a browser-based annotation tool ([matrix.md.ai](https://matrix.md.ai)) on a 6-megapixel diagnostic monitor (Radiforce RX 660, EIZO), reviewing all images in DICOM format. Annotations followed ACR and RANZCR positioning guidelines (ACR, 1999; RANZCR, 2002) and included:
 
+- The nipple location (bounding box)
+- The pectoralis muscle line from its inferior end on MLO views
 
-| Dataset     | Automatically Drawn PNL-Based Positioning | Expert Qualitative Assessment |
-|:-----------:|:-----------------------------------------:|:-----------------------------:|
-| Training    | 967 good, 633 poor                        | 1,185 good, 415 poor          |
-| Validation  | 108 good, 92 poor                         | 132 good, 68 poor             |
-| Testing     | 123 good, 77 poor                         | 146 good, 54 poor             |
+> **Note:** PNL coordinates are not provided directly. The PNL is automatically derived by applying a 90° perpendicular rule from the nipple coordinate to the pectoralis muscle line, ensuring geometric consistency across all samples.
 
+### Qualitative Labels (`qualitativeLabel`)
 
-<img width="500" alt="image" src="https://github.com/tanyelai/deep-breast-positioning/assets/44132720/bee1bcda-8b5a-4538-aaf5-75bb32e44f0e">
+Radiologist E.C. independently assessed each MLO view and classified breast positioning as **good** or **poor** based on ACR quality standards (Hendrick et al., 1999).
 
+## Split Distribution
 
-### Dataset Details
+| Split      | Automated PNL-based Quality | Expert Qualitative Label  |
+|:----------:|:---------------------------:|:-------------------------:|
+| Training   | 967 good, 633 poor          | 1,185 good, 415 poor      |
+| Validation | 108 good, 92 poor           | 132 good, 68 poor         |
+| Testing    | 123 good, 77 poor           | 146 good, 54 poor         |
 
-- **StudyInstanceUID**: Unique identifier for the study (exam) instance.
-- **SOPInstanceUID**: Unique identifier for the image instance of an exam.
-- **annotationMode**: The mode of annotation used (e.g., "line" or "bbox").
-- **labelName**: Specific label names like Pectoralis and Nipple.
-- **data**: Contains coordinates for vertices for lines and for nipples.
-- **qualitativeLabel**: An image-level qualitative label provided by another expert radiologist.
-- **height**: The height of the image in pixels.
-- **width**: The width of the image in pixels.
-- **SeriesDescription**: Images’ view information (e.g., L-MLO or R-MLO).
-- **ImagerPixelSpacing**: Pixel spacing of the image.
-- **SeriesInstanceUID**: Unique identifier for the series instance.
-- **ManufacturerModelName**: The manufacturer's model name of the imaging device.
-- **PhotometricInterpretation**: The photometric interpretation used in the image.
-- **Split**: Designation of the dataset split including Train, Validation, and Test.
+<p align="center">
+  <img width="480" alt="Example annotated mammogram with nipple and pectoralis landmarks" src="../code/regression/figures/debug_landmarks/0e31855d02eadf8670ffaeeaeddbf229_annotated.png">
+</p>
 
-## Citation
-If you use these labels in your research, please cite as follows:
-```
-@article{tanyel2024mammographic,
-  title={Mammographic Breast Positioning Assessment via Deep Learning},
-  author={Tanyel, Toygar and Denizoglu, Nurper and Seker, Mustafa Ege and Alis, Deniz and Cerekci, Esma and Karaarslan, Ercan and Aribal, Erkin and Oksuz, Ilkay},
-  journal={arXiv preprint arXiv:2407.10796},
-  year={2024}
-}
-```
-Will be updated after publication. Accepted at MICCAI 2024, Deep Breast Workshop.
+## CSV Column Descriptions
 
-### References
+| Column                    | Description                                                                                  |
+|---------------------------|----------------------------------------------------------------------------------------------|
+| `StudyInstanceUID`        | Unique identifier for the study (exam)                                                       |
+| `SOPInstanceUID`          | Unique identifier for the image instance within an exam                                      |
+| `annotationMode`          | Annotation type: `"line"` for pectoralis, `"bbox"` for nipple                               |
+| `labelName`               | Label name: `Pectoralis` or `Nipple`                                                         |
+| `data`                    | Vertex coordinates for lines or bounding box corners                                         |
+| `qualitativeLabel`        | Image-level quality label from a second expert radiologist (`good` / `poor`)                 |
+| `height`                  | Image height in pixels                                                                       |
+| `width`                   | Image width in pixels                                                                        |
+| `SeriesDescription`       | Imaging view (e.g., `L-MLO`, `R-MLO`)                                                       |
+| `ImagerPixelSpacing`      | Physical pixel spacing (mm/pixel)                                                            |
+| `SeriesInstanceUID`       | Unique identifier for the image series                                                       |
+| `ManufacturerModelName`   | Manufacturer and model name of the imaging device                                            |
+| `PhotometricInterpretation` | Photometric interpretation of the image (e.g., `MONOCHROME1`, `MONOCHROME2`)             |
+| `Split`                   | Dataset partition: `Train`, `Validation`, or `Test`                                          |
 
-1. Australian Screening Advisory Committee, 2001. National Accreditation Standards BreastScreen Australia Quality Improvement Program (Revised).
-2. Hendrick, R.E., Bassett, L., Botsco, M.A., Deibel, D., Feig, S., Gray, J., Haus, A., Heinlein, R., Kitts, E.L., McCrohan, J., Monsees, B., 1999. Mammography quality control manual. Royal American College of Radiologists.
-3. Nguyen, H.T., Nguyen, H.Q., Pham, H.H., Lam, K., Le, L.T., Dao, M., Vu, V., 2023. VinDr-Mammo: A large-scale benchmark dataset for computer-aided diagnosis in full-field digital mammography. Sci Data 10, 277. [DOI](https://doi.org/10.1038/s41597-023-02100-7)
-4. Royal Australian and New Zealand College of Radiologists, 2002. Mammography quality assurance program.
+## References
+
+1. Hendrick, R.E., Bassett, L., Botsco, M.A., et al. (1999). *Mammography Quality Control Manual*. American College of Radiology.
+2. Nguyen, H.T., Nguyen, H.Q., Pham, H.H., et al. (2023). VinDr-Mammo: A large-scale benchmark dataset for computer-aided diagnosis in full-field digital mammography. *Scientific Data*, 10, 277. [https://doi.org/10.1038/s41597-023-02100-7](https://doi.org/10.1038/s41597-023-02100-7)
+3. Royal Australian and New Zealand College of Radiologists (2002). *Mammography Quality Assurance Program*.

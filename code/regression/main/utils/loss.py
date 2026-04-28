@@ -65,7 +65,7 @@ class MultifacetedLoss(nn.Module):
     def forward(self, prediction, target):
         wing_loss_values = self.wing_loss(prediction, target)
         pec1_loss_value, pec2_loss_value, nipple_loss_value = wing_loss_values.mean(dim=1)
-        angle_loss_value = self.angle_loss(prediction, target)
+
 
         total_loss = self.alpha * pec1_loss_value + \
                      self.beta * pec2_loss_value + \

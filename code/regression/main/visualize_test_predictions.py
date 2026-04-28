@@ -2,14 +2,20 @@
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-from utils.models import UNet, RAUNet, CRAUNet, ResNeXt50
+from utils.models import UNet, RAUNet
 from utils.dataloader import create_dataloaders
 import os
 import pandas as pd
 import matplotlib.patches as patches
 
-def load_model(model_path, device):
-    model = UNet(in_channels=1, out_features=6).to(device)
+def load_model(model_name, model_path, device):
+    if model_name == "UNet":
+        model = UNet(in_channels=1, out_features=6).to(device)
+    elif model_name == "RAUNet":
+        model = RAUNet(in_channels=1, out_features=6).to(device)
+    else:
+        raise ValueError("Invalid model type specified")
+        
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.eval()
     return model
@@ -25,8 +31,6 @@ def visualize_prediction(image, predicted_landmarks, original_landmarks, draw=Tr
     longest_dimension = max(img_height, img_width)
     margin = (threshold_percentage / 100.0) * longest_dimension  # Calculate the safe zone margin
 
-    
-    # Correctly rescale the landmarks
     # Reshape the landmarks for easier manipulation
     predicted_landmarks = np.reshape(predicted_landmarks, (-1, 2))  # Reshape to (N, 2) where N is number of landmarks
     original_landmarks = np.reshape(original_landmarks, (-1, 2))
@@ -92,8 +96,6 @@ def visualize_prediction(image, predicted_landmarks, original_landmarks, draw=Tr
     plt.savefig(os.path.join(predictions_dir, f"{title}.png"), dpi=300, bbox_inches='tight')
     plt.close()
 
-
-
 def preprocess_data(config):
     # Assuming this function prepares your data and it's correctly implemented in your project.
     split_df = pd.read_csv(config['split_file'])
@@ -129,20 +131,17 @@ def main(config):
     test_loader = dataloaders['Test']
 
     # Load the model
-    model = load_model(config['best_model_path'], device)
+    model = load_model(config['model_type'], config['best_model_path'], device)
     
     # Test the model
     test_model(config, model, test_loader)
 
-
-# change paths to your own
+# change paths to your own
 if __name__ == "__main__":
-    config = {
-        'split_file': '../unified_data_with_splits.csv',
-        'details_file': '../transformation_details.csv',
-        'base_image_dir': '../images',
-        'best_model_path': '../UNet_baseline.pth',
-        'batch_size': 1, 
-        'target_task': 'all'
-    }
+    import argparse
+    from utils.evaluation_utils import load_config
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str, default='configs/example_eval_config.json')
+    args = parser.parse_args()
+    config = load_config(args.config)
     main(config)

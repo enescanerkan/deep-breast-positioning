@@ -203,12 +203,12 @@ class MammogramDataset:
         df_details.to_csv(os.path.join(self.output_dir, "transformation_details.csv"), index=False)
 
 
-# change paths to your own
+# Change paths to your own
 def main():
-    annotations_file = '../annotations/unified_data.csv'
-    base_image_dir = '../quality'
-    base_landmark_dir = '../landmark_coords' 
-    output_dir = '../data'
+    annotations_file = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'labels', 'positioning_labels.csv')
+    base_image_dir = os.path.join(os.path.dirname(__file__), '..', 'quality')
+    base_landmark_dir = os.path.join(os.path.dirname(__file__), '..', 'landmark_coords')
+    output_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
 
     dataset = MammogramDataset(annotations_file, base_image_dir, base_landmark_dir, output_dir)
     filtered_indices = dataset.dataframe[dataset.dataframe['labelName'] == 'Pectoralis'].index.tolist()
@@ -219,4 +219,4 @@ def main():
     dataset.finalize()
 
 if __name__ == "__main__":
-    main()
+    main()

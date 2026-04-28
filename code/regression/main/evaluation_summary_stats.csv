@@ -1,0 +1,12 @@
+Metric,Value
+Overall Automated Accuracy,"85.00% (Sensitivity: 72.73, Specificity: 91.04)"
+Overall Manual Accuracy,"85.00% (Sensitivity: 77.78, Specificity: 87.67)"
+mm_perpendicular Mean (Std),"6.00 (5.41), Median: 4.45"
+mm_pec1 Mean (Std),"6.88 (6.17), Median: 5.12"
+mm_pec2 Mean (Std),"8.85 (9.89), Median: 6.49"
+mm_nipple Mean (Std),"3.01 (2.53), Median: 2.34"
+Angular Distance Mean (Std),"2.94 (2.61), Median: 2.26"
+Perpendicular Distance Mean (Std),12.44 (11.33)
+Pec1 Distance Mean (Std),14.02 (12.51)
+Pec2 Distance Mean (Std),18.37 (20.67)
+Nipple Distance Mean (Std),6.32 (5.50)

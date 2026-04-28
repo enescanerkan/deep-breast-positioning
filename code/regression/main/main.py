@@ -8,7 +8,7 @@ import os
 from utils.dataloader import create_dataloaders, preprocess_data
 from utils.train import Trainer
 from utils.validate import Validator
-from utils.models import UNet, RAUNet, CRAUNet, GuptaModel, ResNeXt50
+from utils.models import UNet, RAUNet
 
 def load_config(config_path):
     with open(config_path, 'r') as file:
@@ -39,10 +39,6 @@ def main(config):
         model = UNet(in_channels=1, out_features=out_features)
     elif config['model_type'] == "RAUNet": # Attention UNet
         model = RAUNet(in_channels=1, out_features=out_features)
-    elif config['model_type'] == "CRAUNet": # CoordAttention UNet
-        model = CRAUNet(in_channels=1, out_features=out_features)
-    elif config['model_type'] == "ResNeXt50":
-        model = ResNeXt50(in_channels=1, out_features=out_features)
     else:
         raise ValueError("Invalid model type specified")
     

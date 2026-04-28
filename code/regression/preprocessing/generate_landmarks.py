@@ -37,8 +37,10 @@ def process_images(csv_path, dicom_base_path, landmarks_save_path):
         save_landmarks_as_json(adjusted_pectoralis_line, nipple_point, json_path)
         print(f"Processed and saved landmarks for {row['SOPInstanceUID']}")
 
-csv_path = '../annotations/unified_data.csv'
-dicom_base_path = '../quality'
-landmarks_save_path = '../landmark_coords'
+if __name__ == '__main__':
+    script_dir = os.path.dirname(__file__)
+    csv_path = os.path.join(script_dir, '..', '..', '..', 'labels', 'positioning_labels.csv')
+    dicom_base_path = os.path.join(script_dir, '..', 'quality')
+    landmarks_save_path = os.path.join(script_dir, '..', 'landmark_coords')
 
-process_images(csv_path, dicom_base_path, landmarks_save_path)
+    process_images(csv_path, dicom_base_path, landmarks_save_path)

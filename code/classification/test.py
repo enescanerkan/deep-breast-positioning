@@ -9,12 +9,12 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     config = {
         'device': device,
-        'image_dir': '../data/images',
-        'annotations_file': '../classification_data.csv',
+        'image_dir': '../regression/data/images',
+        'annotations_file': '../../labels/positioning_labels.csv',
         'batch_size': 8,
         'model_name': 'resnext50',
         'num_classes': 2,
-        'label_type': 'automated' # automated, manual
+        'label_type': 'manual' # automated, manual
     }
 
     # Use the 'Test' split
@@ -33,7 +33,7 @@ def main():
     model = model.to(device)
 
     # Load the model weights from a pre-saved checkpoint
-    model.load_state_dict(torch.load('../classification/results/best_model.pth', map_location=device))
+    model.load_state_dict(torch.load('models/best_model.pth', map_location=device))
 
     # Perform GradCAM Visualization
     gradcam_visualization(model, test_loader, device, output_dir="gradcam_outs")

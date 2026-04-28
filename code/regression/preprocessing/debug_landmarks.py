@@ -4,10 +4,11 @@ from utils import verify_landmarks
 import os
 import pandas as pd
 
-unified_df = pd.read_csv('../annotations/unified_data.csv')
-dicom_base_path = '../quality'
-landmark_save_path = '../landmark/landmark_coords'
-fig_save_path = '../figures/debug_landmarks'
+script_dir = os.path.dirname(__file__)
+unified_df = pd.read_csv(os.path.join(script_dir, '..', '..', '..', 'labels', 'positioning_labels.csv'))
+dicom_base_path = os.path.join(script_dir, '..', 'quality')
+landmark_save_path = os.path.join(script_dir, '..', 'landmark_coords')
+fig_save_path = os.path.join(script_dir, '..', 'figures', 'debug_landmarks')
 
 sop_instance_uids = [
     'ac0f58c8690f16fe4dcd300bb3e7ee0b',
