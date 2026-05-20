@@ -4,3 +4,11 @@ __pycache__/
 code/regression/data/images/
 code/classification/models/
 code/regression/main/models/
+
+# 10-fold CV artifacts (generated locally; do not commit)
+results/
+statistical_test/output/
+configs/UNet_fold_*.json
+configs/RAUNet_fold_*.json
+configs/ResNeXt50_fold_*.json
+labels/positioning_labels_fold_*.csv

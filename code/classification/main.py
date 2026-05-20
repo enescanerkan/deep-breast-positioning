@@ -14,6 +14,8 @@ Users need to create this file using the labels we provide.
 Feel free to modify these variable names as needed.
 """
 
+import argparse
+import json
 import torch
 import os
 import pandas as pd
@@ -91,20 +93,36 @@ def main(config):
 
 # change paths to your own
 
+DEFAULT_CONFIG = {
+    'model_name': 'resnext50',  # or 'resnet50', 'efficientnetv2', etc.
+    'label_type': 'manual',  # 'manual' or 'automated'
+    'num_classes': 2,
+    'batch_size': 8,
+    'num_epochs': 30,
+    'base_lr': 1e-5,
+    'max_lr': 5e-4,
+    'step_size_down': 10,
+    'learning_rate': 1e-4,
+    'image_dir': '../regression/data/images',
+    'annotations_file': '../../labels/positioning_labels.csv',
+    'best_model_path': 'models/best_model.pth',
+}
+
+
+def load_config(path):
+    with open(path, encoding='utf-8') as f:
+        return json.load(f)
+
+
 if __name__ == "__main__":
-    config = {
-        'model_name': 'resnext50',  # or 'resnet50', 'efficientnetv2', etc.
-        'label_type': 'manual',  # 'manual or 'automated'
-        'num_classes': 2,
-        'batch_size': 8,
-        'num_epochs': 30,
-        'base_lr': 1e-5,
-        'max_lr': 5e-4,
-        'step_size_down': 10,
-        'learning_rate': 1e-4,
-        'device': torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-        'image_dir': '../regression/data/images',
-        'annotations_file': '../../labels/positioning_labels.csv',
-        'best_model_path': 'models/best_model.pth'
-    }
+    parser = argparse.ArgumentParser(description="ResNeXt50 positioning quality classifier — training")
+    parser.add_argument('--config', type=str, default=None,
+                        help="Optional path to per-fold JSON config (e.g. configs/ResNeXt50_fold_2.json). "
+                             "If omitted, uses the baseline hardcoded config.")
+    args = parser.parse_args()
+
+    config = load_config(args.config) if args.config else dict(DEFAULT_CONFIG)
+    requested_device = config.get('device', 'cuda')
+    if isinstance(requested_device, str):
+        config['device'] = torch.device(requested_device if torch.cuda.is_available() else 'cpu')
     main(config)

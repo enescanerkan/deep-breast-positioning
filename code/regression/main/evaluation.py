@@ -211,7 +211,20 @@ def evaluate_and_label(config, model, test_loader, unified_df):
                   f"{nipple_distance_mean_std[0]:.2f} ({nipple_distance_mean_std[1]:.2f})"]
                   
     })
-    summary_stats.to_csv('evaluation_summary_stats.csv', index=False)
+    # Output paths: per-fold runs set `eval_artifact_stem` (e.g.
+    # `../../../results/RAUNet_fold_2_eval`) so each fold writes a unique
+    # `<stem>_per_image.csv` consumed by statistical_test/run_cv_statistics.py.
+    # Baseline runs without the field keep the original filenames.
+    import os
+    artifact_stem = config.get('eval_artifact_stem')
+    if artifact_stem:
+        summary_path = f"{artifact_stem}_summary_stats.csv"
+        per_image_path = f"{artifact_stem}_per_image.csv"
+        os.makedirs(os.path.dirname(summary_path) or '.', exist_ok=True)
+    else:
+        summary_path = 'evaluation_summary_stats.csv'
+        per_image_path = 'evaluation_results_with_accuracy_and_distances.csv'
+    summary_stats.to_csv(summary_path, index=False)
 
     # Convert evaluation results to DataFrame and save to CSV
     results_df = pd.DataFrame(evaluation_results)
@@ -222,9 +235,9 @@ def evaluate_and_label(config, model, test_loader, unified_df):
             "angular_distance", "original_angle", "predicted_angle", "perp_org_x", "perp_org_y",
             "perp_pred_x", "perp_pred_y",
             "pec1_org_x", "pec1_org_y", "pec1_pred_x", "pec1_pred_y",
-            "pec2_org_x", "pec2_org_y", "pec2_pred_x", "pec2_pred_y"]  
+            "pec2_org_x", "pec2_org_y", "pec2_pred_x", "pec2_pred_y"]
     results_df = results_df[cols]
-    results_df.to_csv('evaluation_results_with_accuracy_and_distances.csv', index=False)
+    results_df.to_csv(per_image_path, index=False)
     
     print("Evaluation complete. Results saved.")
 
